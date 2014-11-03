@@ -18,6 +18,10 @@ This may lead to several possible "chain combos" if additional colors match.
 
 Controls:
 
+*  To pause the game press SHIFT
+*  To move the pair of spheres use arrows.
+*  To close the game press ESC or CTRL-C or just close the window.
+*  To run the game go to bin directory and type: java PuyoFrame
 
 Known issues and bugs:
 
