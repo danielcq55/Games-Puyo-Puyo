@@ -1,12 +1,13 @@
 /**********************************************************
- * Minimal version of Puyo-Puyo Game 
+ * Version of Puyo-Puyo Game 
  * See README for rules of the game.
- * 1) User can't rotate the pair of blocks  she/he can move.
- * 2) Blocks are circles without images.
+ * 1) User can rotate the pair of blocks.
+ * 2) Blocks are  circles without images.
  * 
  * Author: Daniel Castanon-Quiroz 
  * email: danielcq55@gmail.com
  */
+
 
 
 
@@ -27,11 +28,13 @@ interface GameParameters{
     int height=width*2;
     int num_pipes   = 6;
     int block_radius = width/num_pipes/2 ;
-   //Colors of the blocks    
+    //Colors of the blocks
     Color colors[]={Color.RED,Color.BLUE,Color.GREEN, Color.PINK,Color.BLACK, Color.ORANGE,Color.MAGENTA};
-    //Orientations for blocks
+    //Directions to move
     int RIGHT=1,LEFT=2,DOWN=3, UP=4;
-    //Maximum number of blocks allow in a pipe    
+    //Orientations for blocks
+    int RIGHT_OR=0, TOP_OR=1,LEFT_OR=2, BOTTOM_OR=3;
+    //Maximum number of blocks allow in a pipe
     int max_nblocks_in_pipe=10;
     //Minimum number of blocks of the same color
     //to cause a chain reaction and make them vanish
@@ -65,31 +68,31 @@ public class PuyoGame  implements GameParameters {
     {
         
     	Random r= new Random();
-    	//prepare the left block
+    	//prepare the blockA
     	int blkradius =  block_radius;
-    	//by default the pair is located always in the pipes number 2 and 3
-    	//since the blocks have to be glued
-    	int left_pipe  =2;
-     	
+    	
+    	//pipe to init the blockA
+    	int left_pipe  =2;    	
     	int color_index=r.nextInt(7); 
     	
-    	Block left_block  = 
-    			new Block(blkradius+   left_pipe*2*blkradius, height/6 ,blkradius, colors[color_index]); 
-    	left_block.pipe= left_pipe;
+    	Block blockA  = 
+    			new Block(blkradius+   left_pipe*2*blkradius, height/4 ,blkradius, colors[color_index]); 
+    	blockA.pipe= left_pipe;
      
     	//prepare the right block
     	color_index=r.nextInt(7); 
-    	int right_pipe =left_pipe + 1;
+    	int right_pipe =left_pipe + 1;//the blocks are glued
 
-    	Block right_block = 
-    			new Block(blkradius +  right_pipe*2*blkradius, height/6+ height/6*0 ,blkradius, colors[color_index]);
-                       right_block.pipe= right_pipe;
+    	Block blockB = 
+    			new Block(blkradius +  right_pipe*2*blkradius, height/4+ height/6*0 ,blkradius, colors[color_index]);
+        blockB.pipe= right_pipe;
           
-         
-    	
-        //store them as the current  pair to control
-        current_pair.left =left_block;
-        current_pair.right=right_block;
+                     
+        //store them in the pair
+        current_pair.blockA =blockA;
+        current_pair.blockB=blockB;
+        //by default A and B are glued and B is the right
+        current_pair.blockB_OR=RIGHT_OR;
                  
     }    
  
@@ -160,7 +163,7 @@ public class PuyoGame  implements GameParameters {
   		return true;
 
     	}
-    	//if hits the ground
+    	//if  hits the ground
     	else      
     	{
     		blk.index = pipes[blk.pipe].blocks.size();
@@ -173,46 +176,76 @@ public class PuyoGame  implements GameParameters {
 
     //move the current blockPair
     private void MovePair(){
+    	    	
       
     //move the blocks
-      boolean b1__ = MoveBlock(current_pair.left) ;
-      boolean b2__ = MoveBlock(current_pair.right); 
-      
+      boolean ba__ = MoveBlock(current_pair.blockA) ;
+      boolean bb__ = MoveBlock(current_pair.blockB); 
 
-      // left moves, right does not
-      if( b1__&& (!b2__) ){
-
-      floatingBlocks.addLast(current_pair.left);//left block is now user control free
-      //Checks  chain reaction for the right block that is not moving anymore!!
-      SeeChainReaction(current_pair.right);
-      ReleasePair();//release another BlockPair for user control      
-
-      }
-       
-      
-      //right moves, left does not
-      else if(b2__ && (!b1__) ){
-                floatingBlocks.addLast(current_pair.right);//left block is now user control free
-                //Checks  chain reaction for the left block that is not moving anymore!!             
-                SeeChainReaction(current_pair.left);
-                ReleasePair();//release another BlockPair for user control      
+      //blockA does not move and right block is on top      
+      if((!ba__) && (current_pair.blockB_OR== TOP_OR))
+      {
+        
+              SeeChainReaction(current_pair.blockA);      
+              
+              if(current_pair.blockA.color!=current_pair.blockB.color)             
+            	  SeeChainReaction(current_pair.blockB);
+              
+              ReleasePair();
 
       }
-      
-      //both are not moving
-      else if(! (b1__ && b2__))
-          {
+
+      //blockB does not move and is at the bottom       
+      else   if((!bb__) && (current_pair.blockB_OR== BOTTOM_OR))
+      {
+        
+
+              pipes[current_pair.blockB.pipe].blocks.addLast(current_pair.blockA); //left block is still free !!
+              current_pair.blockA.index =current_pair.blockB.index+1;
+                    
+              SeeChainReaction(current_pair.blockB);      
+        
+              if(current_pair.blockA.color!=current_pair.blockB.color)             
+            	  SeeChainReaction(current_pair.blockA);                        
+        
+              ReleasePair();
+
+      }
+     
+      // blockA moves, blockB does not and both are in horizontal position        
+      else if( ba__&& (!bb__) ){
+    	      floatingBlocks.addLast(current_pair.blockA);
+              
+    	      //Checks  chain reaction!!
+    	      SeeChainReaction(current_pair.blockB);
+    	      ReleasePair();
           
-    	  if(current_pair.left.color!=current_pair.right.color)             
-    		  SeeChainReaction(current_pair.left);
-                
-    	  SeeChainReaction(current_pair.right);
-    	  ReleasePair();//release another BlockPair for user control                
-               
-          }
+      }
+ 
+      // blockB moves, blockA does not and both are in horizontal position     
+      else if(bb__ && (!ba__) ){
+          	floatingBlocks.addLast(current_pair.blockB);
+          
+          	//Checks  chain reaction!!
+          	SeeChainReaction(current_pair.blockA);
+           	ReleasePair();
          
-  
+      }
+
+      //  both are not moving and are in horizontal position     
+      else if(! (ba__ && bb__))
+      {
       
+           if(current_pair.blockA.color!=current_pair.blockB.color)             
+        	   SeeChainReaction(current_pair.blockA);
+            
+           	SeeChainReaction(current_pair.blockB);
+           	ReleasePair();
+           	
+      }
+
+
+
     }
 
 
@@ -269,6 +302,9 @@ public class PuyoGame  implements GameParameters {
         	   MovePairTo(DOWN);
                 break;     
                 
+           case KeyEvent.VK_CONTROL:
+        	   RotatePair();
+                break;     
                 
         }                           
                                    
@@ -278,65 +314,160 @@ public class PuyoGame  implements GameParameters {
     
 
     private void MovePairTo(int dir){
-    
-    
+        
     	switch(dir)
     	{
-    	case LEFT:    {        	//player wants to go left   
-    		if(!CheckBoundaries(current_pair.left,LEFT))    
-    			if(Move2FormerPipe(current_pair.left)) 
-    				Move2FormerPipe(current_pair.right); 
-    		break;
-      		}	
+    	
+    		case DOWN:{//player wants to go down
+    			
+    			switch(current_pair.blockB_OR){
 
-                          
-  
-    	case RIGHT : {        	//player wants to go right
+    			// blockB is at the top
+     				case TOP_OR:
+     					//Check if blockA which is at bottom hits something
+     					if(!CheckBoundaries(current_pair.blockA,DOWN))
+     						{
+     						current_pair.blockA.centerY+=2;
+     						current_pair.blockB.centerY+=2;
+     						}
+     					break; 
+     				
+     				default:	
+     				//block B is at the bottom or by the side of blockA
+     					if(!CheckBoundaries(current_pair.blockB,DOWN)){           		
+     						current_pair.blockA.centerY+=2;
+     						current_pair.blockB.centerY+=2;
+     					}
+    		    	break; 
+    			}
+    		 break;
+    		}
+        	//player wants to go left
+        	case LEFT :{
+            
+        		switch(current_pair.blockB_OR)
+        		{
+                   // blockB is at the right side
+        			case RIGHT_OR:
+        			{
+        				if(!CheckBoundaries(current_pair.blockA,LEFT))    
+        					if(Move2FormerPipe(current_pair.blockA)) 
+        						Move2FormerPipe(current_pair.blockB); 
+        				break;
+        			}
+                
+        			//blockB  is at the top
+        			case TOP_OR:
+        			{
+        				if(!CheckBoundaries(current_pair.blockA,LEFT))    
+        					if(Move2FormerPipe(current_pair.blockA)) 
+        						Move2FormerPipe(current_pair.blockB); 
+        				break;
+        			}
+                 
+        			//blockB  is at the left side        			
+        			case LEFT_OR:
+        				{
+        					if(!CheckBoundaries(current_pair.blockB,LEFT))    
+        						if(Move2FormerPipe(current_pair.blockB)) 
+        							Move2FormerPipe(current_pair.blockA); 
+        					break;
+        				}
+                 
+                 
+        			//blockB is at the bottom        			                
+                    case BOTTOM_OR:
+                    {
+                    	if(!CheckBoundaries(current_pair.blockA,LEFT))    
+                    		if(Move2FormerPipe(current_pair.blockB)) 
+                    			Move2FormerPipe(current_pair.blockA); 
+                    	break;
+                    }
+         
+        		}
+                break;   //case left             		
+        	}	
+        
+                    
+        	//player wants to go right
+        	case RIGHT : {
 
-      
-        	
-    		if(!CheckBoundaries(current_pair.right,RIGHT)) 
-    			if(Move2NextPipe(current_pair.right))  
-    				Move2NextPipe(current_pair.left);         
-    		break;
-    	}
+        		switch(current_pair.blockB_OR)
+        		{
+        		   //blockB is at the right side    			
+                	case RIGHT_OR:
+                	{    
 
-          case DOWN:{//player wants to go down 
-        	  	if(!CheckBoundaries(current_pair.right,DOWN)){           		
-        	  		current_pair.right.centerY+=2;
-        		    current_pair.left.centerY+=2;        	  
-        	  	}
-        	  	break; 
+                		if(!CheckBoundaries(current_pair.blockB,RIGHT)) 
+                			if(Move2NextPipe(current_pair.blockB))  
+                				Move2NextPipe(current_pair.blockA); 
+                    
+                		break;
+                	}
+                
+                
+                	//blockB is at the top    			                
+                	case TOP_OR:
+                	{    
 
-          }
-                  
-                                  
-    	}
+                		if(!CheckBoundaries(current_pair.blockB,RIGHT)) 
+                			if(Move2NextPipe(current_pair.blockA))  
+                				Move2NextPipe(current_pair.blockB); 
+                    
+                		break;
+                	}
+                   
+                   
+                	//blockB is at the left side    			                                	
+                	case LEFT_OR:
+                	{    
 
+                		if(!CheckBoundaries(current_pair.blockA,RIGHT)) 
+                			if(Move2NextPipe(current_pair.blockA))  
+                				Move2NextPipe(current_pair.blockB); 
+                    
+                		break;
+                	}
+                
+                	//blockB is at the bottom    			                                	                	
+                	case BOTTOM_OR:
+                	{    
+
+                		if(!CheckBoundaries(current_pair.blockB,RIGHT)) 
+                			if(Move2NextPipe(current_pair.blockB))  
+                				Move2NextPipe(current_pair.blockA); 
+                    
+                		break;
+                	}	                                                                     
+            
+        		}	
+
+        		break;//switch right
+        	}
+
+    	}//switch dir
+    	
     }
-
 
     //Check if we are hitting a wall
     private boolean CheckBoundaries(Block blk, int dir){
                 
     	switch(dir)
     	{
-    	case LEFT:  return  blk.pipe == 0;
-    	case RIGHT: return  blk.pipe == (num_pipes-1);
-    	case DOWN :{
+    		case LEFT:  return  blk.pipe == 0;
+    		case RIGHT: return  blk.pipe == (num_pipes-1);
+    		case DOWN :{
                           
     		return  blk.centerY+block_radius > height;
-    		
+    			
+    		}
+    		default:    return  false;
     	}
-    	default:    return  false;
-  }
 
-    
-    }
+    }	
 
 
-  
-    //Move Block to the next (right) pipe
+    //Check Block to the next (right) pipe
     private boolean  Move2NextPipe( Block blk){
         
     	if( ! pipes[blk.pipe +1].blocks.isEmpty())         
@@ -353,7 +484,7 @@ public class PuyoGame  implements GameParameters {
 	}
   
     
-    //Move Block to the former (left) pipe         
+         
     private boolean  Move2FormerPipe(Block blk){
 
                 
@@ -369,7 +500,140 @@ public class PuyoGame  implements GameParameters {
       
   }
 
-    //See if there is a neighborhood of blocks of the same color
+
+    
+    //User can rotate the pair of blocks
+    public void RotatePair(){
+        
+      
+    //we can only rotate blockB and only counterclockwise    
+     int orientation=  current_pair.blockB_OR;
+      
+    
+          switch(orientation)
+          {
+              
+              case RIGHT_OR:          // right to top
+                     {
+                         current_pair.blockB_OR=TOP_OR;
+                         current_pair.blockB.centerX=current_pair.blockA.centerX;
+                         current_pair.blockB.centerY=current_pair.blockA.centerY - 2*block_radius;
+                         current_pair.blockB.pipe=current_pair.blockA.pipe;
+                        
+                         break;
+                         
+                       }
+              
+    
+              case  TOP_OR:          //  top to left
+              {
+            	  if(current_pair.blockB.pipe > 0)//we don't hit the left wall
+                  	{//by default we can rotate
+            		  boolean rotate__=true;
+            		    //check if the precedent pipe is not empty
+            		  	if( ! pipes[current_pair.blockA.pipe-1].blocks.isEmpty())    
+            		  	{   //check if the left block is still moving 
+            		  		if(current_pair.blockA.CollideDown( (Block) pipes[current_pair.blockA.pipe-1].blocks.getLast()))
+            		  		{        //check if the right block does not hit the pipe we want to rotate using left block
+            		  				if(current_pair.blockA.CollideLeft( (Block) pipes[current_pair.blockA.pipe-1].blocks.getLast()))
+            		  				{
+            		  					rotate__ = false;//we cannot rotate
+            		  				}
+            		  		}
+            		  	}
+            		  	
+            		  	if(rotate__){
+            		  		current_pair.blockB.centerY=current_pair.blockA.centerY;
+            		  		current_pair.blockB.centerX=current_pair.blockA.centerX -  2*block_radius;
+            		  		current_pair.blockB_OR=LEFT_OR;
+            		  		current_pair.blockB.pipe--;
+            		  	}
+                
+                  }
+                 
+                      
+                  break;
+               }
+      
+                            
+              case  LEFT_OR:          //  left to   bottom 
+              {
+            	  
+                     //do we hit the ground?
+                     if(CheckBoundaries(current_pair.blockB,DOWN))
+                      break;
+                                    
+                     //block for tests
+                      Block block__=   new Block(0,0,0, Color.RED);
+                      block__.radius=  block_radius;
+                      block__.centerY= current_pair.blockA.centerY +  2*block_radius;
+             
+                      //if we rotate would be hitting the ground
+                      if(CheckBoundaries(block__,DOWN))  
+                    	  break;             
+                                        
+                      // test whether is anything at the bottom of the right block
+                      if(!pipes[current_pair.blockB.pipe].blocks.isEmpty())
+                    	  if( block__.CollideDown( (Block) pipes[current_pair.blockB.pipe].blocks.getLast() ))
+                         break;
+                      
+                                                    
+                      
+                      block__.centerX= current_pair.blockA.centerX;
+                                            
+                      	// test whether is anything at the bottom of the left block                     
+                      	if(!pipes[current_pair.blockA.pipe].blocks.isEmpty())
+                      		if( block__.CollideDown( (Block) pipes[current_pair.blockA.pipe].blocks.getLast() ))
+                      			break;
+                    
+                      
+                      //if we rotate would be hitting the ground
+                      if(CheckBoundaries(current_pair.blockB,DOWN))  
+                    	  break;                                           
+              
+                      	current_pair.blockB_OR=BOTTOM_OR;
+                      	current_pair.blockB.centerY=current_pair.blockA.centerY +  2*block_radius;
+                      	current_pair.blockB.centerX=current_pair.blockA.centerX;
+                      	current_pair.blockB.pipe=current_pair.blockA.pipe;                                                   
+                  
+                  break;
+               } 
+     
+     
+     
+     
+     
+            case  BOTTOM_OR:          //  bottom to right
+              {
+                  if(current_pair.blockB.pipe < num_pipes - 1)
+                  {
+                                           
+                      boolean rotate__=true;
+                      
+                      if( ! pipes[current_pair.blockB.pipe+1].blocks.isEmpty())         
+                    	  if(  current_pair.blockB.CollideDown( (Block) pipes[current_pair.blockB.pipe +1].blocks.getLast()))    
+                    		  if(  current_pair.blockB.CollideRight( (Block) pipes[current_pair.blockB.pipe+1].blocks.getLast() ))
+                    			  rotate__ = false;   
+                      
+                      if(rotate__) 
+                      {
+                    	  current_pair.blockB_OR=RIGHT_OR;
+                    	  current_pair.blockB.centerY=current_pair.blockA.centerY ;
+                    	  current_pair.blockB.centerX=current_pair.blockA.centerX +  2*block_radius;
+        
+                    	  current_pair.blockB.pipe++;
+                      }
+                  	}
+                 
+                  	break;
+               }	
+     
+          
+          }
+      
+    }
+    
+    //See if there is a neighborhood of blocks of the same color      
     private void  SeeChainReaction(Block blk)
     {
 
@@ -432,6 +696,8 @@ public class PuyoGame  implements GameParameters {
 
     }
 	
+
+
 
     private LinkedList GetNeighbors(Block block){
   

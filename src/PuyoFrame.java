@@ -1,14 +1,13 @@
 /**********************************************************
- * Minimal version of Puyo-Puyo Game 
+ * Version of Puyo-Puyo Game 
  * See README for rules of the game.
- * 1) User can't rotate the pair of blocks  she/he can move.
- * 2) Blocks are circles without images.
+ * 1) User can rotate the pair of blocks.
+ * 2) Blocks are  circles without images.
  * 
  * Author: Daniel Castanon-Quiroz 
  * email: danielcq55@gmail.com
+ * 
  */
-
-
 
 
 import javax.swing.*;
@@ -19,7 +18,6 @@ import java.awt.event.*;
  * The Skeleton of this class comes from the book 
  *  Killer Game Programming in Java, A. Davison , 2005.  
  */
-
 
 public class PuyoFrame extends JFrame implements WindowListener
 

@@ -1,14 +1,13 @@
 /**********************************************************
  * Version of Puyo-Puyo Game 
  * See README for rules of the game.
- * 1) User can't rotate the pair of blocks  she/he can move.
+ * 1) User can rotate the pair of blocks.
  * 2) Blocks are  circles without images.
  * 
  * Author: Daniel Castanon-Quiroz 
  * email: danielcq55@gmail.com
  * 
  */
-
 
 
 
@@ -26,7 +25,6 @@ import java.util.Random;
  * The Skeleton of this class comes from the book 
  *  Killer Game Programming in Java, A. Davison , 2005.  
  */
-
 
 public class PuyoPanel extends JPanel implements Runnable, GameParameters
 {
@@ -325,19 +323,19 @@ private void gameRender()
 private void gameOverMessage(Graphics g)
 // center the game-over message in the panel
 {
-  String msg1 = "Game Over"; 
-  String msg2 = "Your Score: " + score;
+	String msg1 = "Game Over"; 
+	String msg2 = "Your Score: " + score;
+
+	int x = (PWIDTH - metrics.stringWidth(msg1))/4; 
+	int y = (PHEIGHT - metrics.getHeight())/4;
+	g.setColor(Color.red);
+	g.setFont(font);
+	g.drawString(msg1, x, y);
 	
-  int x = (PWIDTH - metrics.stringWidth(msg1))/4; 
-  int y = (PHEIGHT - metrics.getHeight())/4;
-  g.setColor(Color.red);
-  g.setFont(font);
-  g.drawString(msg1, x, y);
-  
-  x = (PWIDTH - metrics.stringWidth(msg2))/2; 
-  y = (PHEIGHT - metrics.getHeight())/2;
-  g.drawString(msg2, x, y);
-}  // end of gameOverMessage()
+	x = (PWIDTH - metrics.stringWidth(msg2))/2; 
+	y = (PHEIGHT - metrics.getHeight())/2;
+	g.drawString(msg2, x, y);
+  }  // end of gameOverMessage()
 
 
 private void paintScreen()

@@ -1,12 +1,14 @@
 /**********************************************************
  * Version of Puyo-Puyo Game 
  * See README for rules of the game.
- * 1) User can't rotate the pair of blocks  she/he can move.
+ * 1) User can rotate the pair of blocks.
  * 2) Blocks are  circles without images.
  * 
  * Author: Daniel Castanon-Quiroz 
  * email: danielcq55@gmail.com
  */
+
+
 
 
 
@@ -117,18 +119,20 @@ class BlockPipe{
 //Pair of blocks
 class BlockPair{
   
-      Block left;
-      Block right;
+      Block blockA; 
+      Block blockB;
+      int   blockB_OR;  //  Orientation 0 on right, 1 on top,  2 on left, 3 on bottom
 
       
   BlockPair(){
-  
+
+	  blockB_OR=0;// by default A is at the left and B at the right
   
   }
     
       public void paint(Graphics g){
-          left.paint(g);
-          right.paint(g);
+          blockA.paint(g);
+          blockB.paint(g);
       }
      
 }
