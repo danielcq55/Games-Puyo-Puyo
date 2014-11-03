@@ -18,10 +18,6 @@ This may lead to several possible "chain combos" if additional colors match.
 
 Controls:
 
-* To pause the game press <shift>
-* To move the pair of spheres use arrows.
-
-
 
 Known issues and bugs:
 
