@@ -5,6 +5,8 @@ Game-Puyo-Puyo on Java
 by Daniel Castanon-Quiroz
 
 email: danielcq55@gmail.com
+
+Version: 1.2
 =============================================================================
 
 Rules of the Game: 
@@ -25,8 +27,17 @@ Controls:
 *  To close the game press ESC, CTRL-C or just close the window.
 *  To run the game go to bin directory and type: java PuyoFrame
 
-Known issues and bugs:
 
+===========================================================================
+Updates from version 1.0
+1) User can rotate now the spheres on the pair.
+2) Implementation details: 
+   Name of elements in class Block have changed. Now they are
+   called blockA and blocB. 
+
+
+===========================================================================
+Known issues and bugs:
 
 * When a linking is produced and some spheres are removed, the remaining ones, which fill the vacated spaces, are not immediately linked.
  
